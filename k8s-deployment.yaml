@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emercoin-9p
+  labels:
+    app: emercoin-9p
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: emercoin-9p
+  template:
+    metadata:
+      labels:
+        app: emercoin-9p
+    spec:
+      containers:
+      - name: emercoin-9p
+        image: emercoin-9p:latest # Change this to your registry image
+        ports:
+        - containerPort: 5640
+        env:
+        - name: EMC_RPC_URL
+          value: "http://192.168.1.116"
+        - name: EMC_RPC_PORT
+          value: "6662"
+        - name: EMC_RPC_USER
+          valueFrom:
+            secretKeyRef:
+              name: emercoin-secrets
+              key: rpc-user
+        - name: EMC_RPC_PASS
+          valueFrom:
+            secretKeyRef:
+              name: emercoin-secrets
+              key: rpc-pass
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emercoin-9p
+spec:
+  selector:
+    app: emercoin-9p
+  ports:
+    - protocol: TCP
+      port: 5640
+      targetPort: 5640
+  type: LoadBalancer # Or NodePort/ClusterIP depending on your grid setup
