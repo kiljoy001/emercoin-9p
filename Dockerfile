@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1
 
 # Build stage
-FROM golang:1.26-alpine AS builder
+FROM golang:1.26-bookworm AS builder
 
 # Install build tools for CGO
-RUN apk add --no-cache build-base
+RUN apt-get update && apt-get install -y build-essential
 
 # Create workspace directory
 WORKDIR /workspace
@@ -28,7 +28,6 @@ RUN go mod download
 RUN CGO_ENABLED=1 GOOS=linux go build -o /app/emercoin9p ./cmd/emercoin9p
 
 # Final stage
-# Use a glibc-based image since CGO by default links against glibc (unless using musl/static)
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
